@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tägliches Rätsel</title>
+    <style>
+        body {
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .game-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        .images {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        .images img {
+            width: 150px;
+            height: auto;
+            border-radius: 5px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h2>Tägliches Rätsel</h2>
+        <div class="images" id="imageContainer">Lade Inhalte...</div>
+        <input type="text" id="answer" placeholder="Dein Lösungswort...">
+        <button onclick="checkAnswer()">Überprüfen</button>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        // 14 Tage x 4 Links pro Tag
+        const imageSets = [
+            // Tag 1
+            [
+                "https://drive.google.com/file/d/16cu7BPOA78z5ZVVqw93PaRijaRkbxQye/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1n3FSCaLTqUZnB1ClBnJcy6Ag2U0yD0eZ/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1lpj5-ILzwI9ZEUfLsqHqDPGgZ2xwVOR0/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1yJfD-wp86uTzEwfZoOUlMwN8wd4lIBDK/view?usp=drive_link"
+            ],
+            // Tag 2
+            [
+                "https://drive.google.com/file/d/1vdzTACV5u3WodrOrGjjINCmmwY_Nbe3U/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1aVYj-68jPJDzpHwMRnVmoi1SY8R4FG1h/view?usp=drive_link", 
+                "https://drive.google.com/file/d/10dt1gSpkbHtagxYOpQ5rNEFveWfzngBq/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1ADXDnJJY04brTmtk4-eaPpcCe72oEIFY/view?usp=drive_link"
+            ],
+            // Tag 3
+            [
+                "https://drive.google.com/file/d/1A-4KExnxl5Qffmsjh8OR6Uo0vFG8WdS4/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1mV5-7NR16_p-7UmOJH6EUKKLoQHX5c0o/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1wCw_nOpJ4Ccpx6nLYYjWCczDzIIyWeh-/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1i07vs4IKSu7T_i8xyTPAkc1SU1DSspZS/view?usp=drive_link"
+            ],
+            // Tag 4
+            [
+                "https://drive.google.com/file/d/1zZXh-yUJ_JRWpwNJq4qYBfypSeYQMJuP/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1uNXLHcBGwCIsVy3yPTgXImmHJ8IfS682/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1PDMigKI0k4kq1m8Icw6_YagS171S5BFm/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1F-vsr0iHltHndiuYnWLy594JZtfqvKIH/view?usp=drive_link"
+            ],
+            // Tag 5
+            [
+                "https://drive.google.com/file/d/1kx6qhEqdqeLym3kdVJlbwyzoU6Mcr4EQ/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1W93lDtcAgObqO6B7xABCUepgjYtmqpRX/view?usp=drive_link", 
+                "https://drive.google.com/file/d/16jQPvKgRxfBUoJsiDR0cu1cEc0nAHJME/view?usp=drive_link", 
+                "https://drive.google.com/file/d/10hnfWlzUTssWFG4pgoiRM8__rGkDNKh7/view?usp=drive_link"
+            ],
+            // Tag 6
+            [
+                "https://drive.google.com/file/d/1kujc__tzILfvYc0fVDS9MSJVac2lLTqt/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1Hu-csNVUVaOxPvhgXu_P3AqERbZgxMKb/view?usp=drive_link", 
+                "https://drive.google.com/file/d/13SAHYiDaw2HEK7ahlkmbcG4E7-WMISaa/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1-n1ApDj_VSikzHkZaDThQ4ean03it7H1/view?usp=drive_link"
+            ],
+            // Tag 7
+            [
+                "https://drive.google.com/file/d/1xWBfgQEVaSQwalRX8ERxIRnehyzhLEXs/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1wRQsh-XrqbSlFvl6L27vigkn68nLy2tf/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1wOEcniQSGu-TpY9Qpr2b5h-rRFoj1P5y/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1Altu6RALEt4LOLfqYiMYWjCJdMHDaSq6/view?usp=drive_link"
+            ],
+            // Tag 8
+            [
+                "https://drive.google.com/file/d/1dEvUciop5seopBKm6bPZOSMhicnXNlfY/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1ZWg_u6678KRPFcLeljRXMhRrrC5uhxma/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1OdBDbCoaNYPvIdx8PEWHcdsm0f6AkGRM/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1Mo8JqYk0b1x8OD-kF444CLJgXUbp2OB7/view?usp=drive_link"
+            ],
+            // Tag 9
+            [
+                "https://drive.google.com/file/d/1_IJ7bc3jUwsmpeV4jDhLflHuRJ1-4mzP/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1OQjtybL0xVNFHfr_KTSTvnBQPwTWeKvB/view?usp=drive_link", 
+                "https://drive.google.com/file/d/13u2Fvmct9X6cslgAV6jfn1AMfWtgq8Kr/view?usp=drive_link", 
+                "https://drive.google.com/file/d/10kz_5ZJBmqHM-rdnJkWTyzEEXih_Rf4Z/view?usp=drive_link"
+            ],
+            // Tag 10
+            [
+                "https://drive.google.com/file/d/1S2VthdND7nU8Vb4uuBijrWv2vlhCQikQ/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1Pmbc6jG35pJdGOomwTSHl4dUQ6BmqGWB/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1JDibRWzmV9X1IB2hzRaZL-mh5YrEG1mQ/view?usp=drive_link", 
+                "https://drive.google.com/file/d/15YMJxQ6LDtLckalya1DAU7gMtf7iw7G0/view?usp=drive_link"
+            ],
+            // Tag 11
+            [
+                "https://drive.google.com/file/d/1rhaPO3VlI8RTtXftEnhCNQfLbzr09b9-/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1odup7qYp89_7_afM7ZciSLLd5BQQ_FBO/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1QxDyXyEScfiBhkcIIWyzIzrObTPdG3lL/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1D8_UIONdsXOLZ3RR-UCvv9VtQ6OsurlZ/view?usp=drive_link"
+            ],
+            // Tag 12
+            [
+                "https://drive.google.com/file/d/1rhaPO3VlI8RTtXftEnhCNQfLbzr09b9-/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1odup7qYp89_7_afM7ZciSLLd5BQQ_FBO/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1QxDyXyEScfiBhkcIIWyzIzrObTPdG3lL/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1D8_UIONdsXOLZ3RR-UCvv9VtQ6OsurlZ/view?usp=drive_link"
+            ],
+            // Tag 13
+            [
+                "https://drive.google.com/file/d/1uqe6pPH5I58oZPA-Ag20jt-IJC1w9cj6/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1AkxW6Pdz281NzO_pmje9ZM33efDbdX9W/view?usp=drive_link", 
+                "https://drive.google.com/file/d/18QtUIqrGBDRsl2A7O8wnGN21qyQcGPZc/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1-Ol_-L1hRSxF9kY1wFS05BTOLVVgdEQL/view?usp=drive_link"
+            ],
+            // Tag 14
+            [
+                "https://drive.google.com/file/d/1zTN3rBAe3XeA8hxgDJgDUVPBQ7--L-Ie/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1noET7pw2F79oXYo5JgXmjPneylotZ5FD/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1Le2ZRSGiFVEGTDdJF9ExmhsGRpen77M7/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1C15O54KiFEIpZpdfc1bbGfsL6rC-mKvz/view?usp=drive_link"
+            ]
+        ];
+
+        let currentDay = 0;
+
+        function loadImages(day) {
+            const imageContainer = document.getElementById('imageContainer');
+            imageContainer.innerHTML = '';
+            const images = imageSets[day];
+            images.forEach(image => {
+                const imgElement = document.createElement('img');
+                imgElement.src = image.replace('/view?', '/uc?');
+                imageContainer.appendChild(imgElement);
+            });
+        }
+
+        function checkAnswer() {
+            const answer = document.getElementById('answer').value.toLowerCase();
+            const correctAnswer = "lösungswort"; // Ersetzen durch das tatsächliche Lösungswort
+
+            const message = document.getElementById('message');
+            if (answer === correctAnswer) {
+                message.style.color = 'green';
+                message.textContent = "Richtig! Du hast das Rätsel gelöst.";
+                currentDay++;
+                if (currentDay < imageSets.length) {
+                    loadImages(currentDay);
+                } else {
+                    message.textContent = "Glückwunsch! Du hast alle Rätsel gelöst!";
+                }
+            } else {
+                message.style.color = 'red';
+                message.textContent = "Leider falsch, versuch es noch einmal!";
+            }
+        }
+
+        loadImages(currentDay); // Initiale Bilder laden
+    </script>
+</body>
+</html>
