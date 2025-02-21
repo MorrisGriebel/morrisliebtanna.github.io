@@ -61,71 +61,91 @@
         // 14 Tage x 4 Medien pro Tag
         const mediaSets = [
             // Tag 1
-            [
-                "https://drive.google.com/uc?export=view&id=16cu7BPOA78z5ZVVqw93PaRijaRkbxQye",  // Bild (JPG)
-                "https://drive.google.com/uc?export=view&id=1n3FSCaLTqUZnB1ClBnJcy6Ag2U0yD0eZ",  // Bild (PNG)
-                "https://drive.google.com/uc?export=view&id=1lpj5-ILzwI9ZEUfLsqHqDPGgZ2xwVOR0",  // Bild (JPG)
-                "https://drive.google.com/uc?export=view&id=1yJfD-wp86uTzEwfZoOUlMwN8wd4lIBDK"   // Video (MP4)
-            ],
+            ["1ABCxyz1", "1DEFxyz2", "1GHIxyz3", "1JKLxyz4"],
             // Tag 2
-            [
-                "https://drive.google.com/uc?export=view&id=1vdzTACV5u3WodrOrGjjINCmmwY_Nbe3U",  // Bild (JPG)
-                "https://drive.google.com/uc?export=view&id=1aVYj-68jPJDzpHwMRnVmoi1SY8R4FG1h",  // Video (MP4)
-                "https://drive.google.com/uc?export=view&id=10dt1gSpkbHtagxYOpQ5rNEFveWfzngBq",  // Bild (PNG)
-                "https://drive.google.com/uc?export=view&id=1ADXDnJJY04brTmtk4-eaPpcCe72oEIFY"   // Video (MP4)
-            ],
+            ["1MNOxyz5", "1PQRxyz6", "1STUxyz7", "1VWXxyz8"],
             // Tag 3
-            [
-                "https://drive.google.com/uc?export=view&id=1A-4KExnxl5Qffmsjh8OR6Uo0vFG8WdS4",  // Bild (JPG)
-                "https://drive.google.com/uc?export=view&id=1mV5-7NR16_p-7UmOJH6EUKKLoQHX5c0o",  // Bild (JPG)
-                "https://drive.google.com/uc?export=view&id=1wCw_nOpJ4Ccpx6nLYYjWCczDzIIyWeh-",  // Video (MP4)
-                "https://drive.google.com/uc?export=view&id=1i07vs4IKSu7T_i8xyTPAkc1SU1DSspZS"   // Bild (PNG)
-            ]
-            // weitere Tage hier hinzufügen
+            ["1YZAxyz9", "1BCDxyz0", "1EFGxyzA", "1HIJxyzB"],
+            // Tag 4
+            ["1KLMxyzC", "1NOPxyzD", "1QRSxyzE", "1TUVxyzF"],
+            // Tag 5
+            ["1WXYxyzG", "1ZABxyzH", "1CDExyzI", "1FGHxyzJ"],
+            // Tag 6
+            ["1IJKxyzK", "1LMNxyzL", "1OPQxyzM", "1RSTxyzN"],
+            // Tag 7
+            ["1UVWxyzO", "1XYZxyzP", "1ABCxyzQ", "1DEFxyzR"],
+            // Tag 8
+            ["1GHIxyzS", "1JKLxyzT", "1MNOxyzU", "1PQRxyzV"],
+            // Tag 9
+            ["1STUxyzW", "1VWXxyzX", "1YZAxyzY", "1BCDxyzZ"],
+            // Tag 10
+            ["1EFGxyz1", "1HIJxyz2", "1KLMxyz3", "1NOPxyz4"],
+            // Tag 11
+            ["1QRSxyz5", "1TUVxyz6", "1WXYxyz7", "1ZABxyz8"],
+            // Tag 12
+            ["1CDExyz9", "1FGHxyz0", "1IJKxyzA", "1LMNxyzB"],
+            // Tag 13
+            ["1OPQxyzC", "1RSTxyzD", "1UVWxyzE", "1XYZxyzF"],
+            // Tag 14
+            ["1ABCxyzG", "1DEFxyzH", "1GHIxyzI", "1JKLxyzJ"]
+        ];
+
+        // 14 Lösungen für 14 Tage
+        const solutions = [
+            "lösung1", "lösung2", "lösung3", "lösung4",
+            "lösung5", "lösung6", "lösung7", "lösung8",
+            "lösung9", "lösung10", "lösung11", "lösung12",
+            "lösung13", "lösung14"
         ];
 
         let currentDay = 0;
+
+        function getGoogleDriveLink(id) {
+            return `https://drive.google.com/uc?export=view&id=${id}`;
+        }
 
         function loadMedia(day) {
             const mediaContainer = document.getElementById('mediaContainer');
             mediaContainer.innerHTML = '';
             const media = mediaSets[day];
-            media.forEach(item => {
-                const fileType = item.split('.').pop().toLowerCase();
+
+            media.forEach((id, index) => {
                 let element;
-
-                if (fileType === 'mp4') {
-                    // Video
-                    element = document.createElement('video');
-                    element.src = item;
-                    element.controls = true;
+                if (index === 3) {
+                    // Video für den letzten Eintrag
+                    element = document.createElement('iframe');
+                    element.src = `https://drive.google.com/file/d/${id}/preview`;
+                    element.width = "200";
+                    element.height = "150";
                 } else {
-                    // Bild
+                    // Bilder für die ersten drei Einträge
                     element = document.createElement('img');
-                    element.src = item;
+                    element.src = getGoogleDriveLink(id);
                 }
-
                 mediaContainer.appendChild(element);
             });
         }
 
         function checkAnswer() {
-            const answer = document.getElementById('answer').value.toLowerCase();
-            const correctAnswer = "lösungswort"; // Ersetzen durch das tatsächliche Lösungswort
-
+            const answer = document.getElementById('answer').value.toLowerCase().trim();
             const message = document.getElementById('message');
-            if (answer === correctAnswer) {
+
+            if (answer === solutions[currentDay]) {
                 message.style.color = 'green';
-                message.textContent = "Richtig! Du hast das Rätsel gelöst! 🎉🎉";
+                message.textContent = `🎉 Richtig! Das Lösungswort war "${solutions[currentDay]}" 🎉`;
                 currentDay++;
                 if (currentDay < mediaSets.length) {
-                    loadMedia(currentDay);
+                    setTimeout(() => {
+                        loadMedia(currentDay);
+                        message.textContent = '';
+                        document.getElementById('answer').value = '';
+                    }, 1500);
                 } else {
-                    message.textContent = "Glückwunsch! Du hast alle Rätsel gelöst! 🏆";
+                    message.textContent = "🏆 Glückwunsch! Du hast ALLE Rätsel gelöst! 🏆";
                 }
             } else {
                 message.style.color = 'red';
-                message.textContent = "Leider falsch, versuch es nochmal! 😅❌";
+                message.textContent = "❌ Falsch! Versuch es nochmal! ❌";
             }
         }
 
