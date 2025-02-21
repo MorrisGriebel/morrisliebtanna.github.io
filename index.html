@@ -1,11 +1,225 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tägliches Rätsel</title>
+    <style>
+        body {
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .game-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        .images {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        .images img {
+            width: 150px;
+            height: auto;
+            border-radius: 5px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
 <body>
+    <div class="game-container">
+        <h2>Tägliches Rätsel 🧩</h2>
+        <div class="images" id="imageContainer">Lade Inhalte... 🔄</div>
+        <input type="text" id="answer" placeholder="Dein Lösungswort... 🤔">
+        <button onclick="checkAnswer()">Überprüfen 🚀</button>
+        <p id="message"></p>
+    </div>
 
-<h1>My First Heading</h1>
+    <script>
+        const imageSets = [
+            // Tag 1 Bilder
+            [
+                "https://drive.google.com/file/d/16cu7BPOA78z5ZVVqw93PaRijaRkbxQye/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1n3FSCaLTqUZnB1ClBnJcy6Ag2U0yD0eZ/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1lpj5-ILzwI9ZEUfLsqHqDPGgZ2xwVOR0/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1yJfD-wp86uTzEwfZoOUlMwN8wd4lIBDK/view?usp=drive_link"
+            ],
+            // Tag 2 Bilder
+            [
+                "https://drive.google.com/file/d/1vdzTACV5u3WodrOrGjjINCmmwY_Nbe3U/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1aVYj-68jPJDzpHwMRnVmoi1SY8R4FG1h/view?usp=drive_link", 
+                "https://drive.google.com/file/d/10dt1gSpkbHtagxYOpQ5rNEFveWfzngBq/view?usp=drive_link", 
+                "https://drive.google.com/file/d/1ADXDnJJY04brTmtk4-eaPpcCe72oEIFY/view?usp=drive_link"
+            ],
+            // Tag 3 Bilder
+            [
+                "https://drive.google.com/file/d/1lEVg4APhF0mEV1JqL4f0ItxkPRH-57Kj/view?usp=drive_link",
+                "https://drive.google.com/file/d/1h_w3X9pHRj44A3Yeg7MijbywhdBGxH8k/view?usp=drive_link",
+                "https://drive.google.com/file/d/1XgQekStgtt8WZPUd8ywQKn9QUtmTXGVN/view?usp=drive_link",
+                "https://drive.google.com/file/d/1dZkpG5Nkmkp_iMwZj9XXQ_lO8hXj2UM8/view?usp=drive_link"
+            ],
+            // Tag 4 Bilder
+            [
+                "https://drive.google.com/file/d/1i64ed5izxEmU0c6z7f16bqjhrFFZoC2P/view?usp=drive_link",
+                "https://drive.google.com/file/d/1X7l14OSpywCZ-wX9Z2lcxBOLy92jTOZk/view?usp=drive_link",
+                "https://drive.google.com/file/d/1kKZjK9Wst6yy3Nh6OgUlruLUwYhK4FJZ/view?usp=drive_link",
+                "https://drive.google.com/file/d/1EXuK9Xc3fdEFA2xYYlkePjhbKn_3JFc8/view?usp=drive_link"
+            ],
+            // Tag 5 Bilder
+            [
+                "https://drive.google.com/file/d/1FmmGo0CUaOd4Am2GgD6otfUjm9WX4p4e/view?usp=drive_link",
+                "https://drive.google.com/file/d/1lFyLlWyhxz6mF0cAN0gXtE4NUPUJWOs6/view?usp=drive_link",
+                "https://drive.google.com/file/d/1XEyj8w4Tr5Q1R1Yx5fhz4ugKAhvP5_tP/view?usp=drive_link",
+                "https://drive.google.com/file/d/1pC9ST4osCbb5Gwbkmg3cA80Jmxjv0Ml1/view?usp=drive_link"
+            ],
+            // Tag 6 Bilder
+            [
+                "https://drive.google.com/file/d/1XXwNdw8VdTYRUUR6xYOgWzF1r0tqZl9v/view?usp=drive_link",
+                "https://drive.google.com/file/d/1J1CvddWnucjlzzk77wr2lfeh_nUGpoTk/view?usp=drive_link",
+                "https://drive.google.com/file/d/1zjFe4kmP-kEgu5C6m0sbjSml5LFhM0rK/view?usp=drive_link",
+                "https://drive.google.com/file/d/1au_bWWz-OV8jAfIhE0g6guDR6lS6RThP/view?usp=drive_link"
+            ],
+            // Tag 7 Bilder
+            [
+                "https://drive.google.com/file/d/1z_J4WmkjzzcAxM6cUoN1cVAMOTWEekXP/view?usp=drive_link",
+                "https://drive.google.com/file/d/1miZ7r2k7U0lV6vx2GjsenT6qucQ8zH76/view?usp=drive_link",
+                "https://drive.google.com/file/d/1NokNYlCF__w2zN6vavZoM9kT3wTOmOnQ/view?usp=drive_link",
+                "https://drive.google.com/file/d/1qlgW0DQ8oBdZzNdR5IbjDEpZ5dQw3XP6/view?usp=drive_link"
+            ],
+            // Tag 8 Bilder
+            [
+                "https://drive.google.com/file/d/1GwpIhsyrZmUzPbihnrfH4mnObmD8fghD/view?usp=drive_link",
+                "https://drive.google.com/file/d/1bqUvdmUGYAzXs7fE0B_v7o2KT1iMK1aY/view?usp=drive_link",
+                "https://drive.google.com/file/d/1AdEw2L4-Rnq4Z2j9zG4bdbO9XaJ0H7Lt/view?usp=drive_link",
+                "https://drive.google.com/file/d/1XTmhhcbq-HKwsh_AoYHkFuaPjlQjPbDh/view?usp=drive_link"
+            ],
+            // Tag 9 Bilder
+            [
+                "https://drive.google.com/file/d/1dztFNoO7ZTBLjXJ9Xjl37hvnXk-D0e3G/view?usp=drive_link",
+                "https://drive.google.com/file/d/1aWhmpp5LMghsUPKfh58v_MjOgCyvYv92/view?usp=drive_link",
+                "https://drive.google.com/file/d/1Sg9P0vmPzXv-0w9dxxhJp4jzqVwGjfgM/view?usp=drive_link",
+                "https://drive.google.com/file/d/1Wqqk0D9yUG4uX1Ul9dFe9FESXZ2n3gwb/view?usp=drive_link"
+            ],
+            // Tag 10 Bilder
+            [
+                "https://drive.google.com/file/d/1-xhD3lTHTOdY2ufn8fIqZ92w4Mk9l9sd/view?usp=drive_link",
+                "https://drive.google.com/file/d/1t2oFJqZPVhP2ARyHpQY6SyRuxSYs_YTq/view?usp=drive_link",
+                "https://drive.google.com/file/d/1GocKcp5gf7tbf4Jph_o61h17IptwZpZJ/view?usp=drive_link",
+                "https://drive.google.com/file/d/1I_mT8RHwhSlaQGn4n7z1QGyPBafkYf4G/view?usp=drive_link"
+            ],
+            // Tag 11 Bilder
+            [
+                "https://drive.google.com/file/d/1LRcpXqXM1U23PCFgV3yjsDd7F7m03XUM/view?usp=drive_link",
+                "https://drive.google.com/file/d/1YXQ_4jz8zK6JzTfVxP6oMMw-DcM8uCjb/view?usp=drive_link",
+                "https://drive.google.com/file/d/1_MssBMiXvbhHvgF9-iM6m-lHYqM0yYxo/view?usp=drive_link",
+                "https://drive.google.com/file/d/1Xc6B2t0I-h6lBXn6wDS7Jk1fdlFkhd2R/view?usp=drive_link"
+            ],
+            // Tag 12 Bilder
+            [
+                "https://drive.google.com/file/d/1Em8PlZBx5dj12_X_62xhWdt7yge3BkdD/view?usp=drive_link",
+                "https://drive.google.com/file/d/1DAj8aGbW56ATcI4a7Mn6GbXmjE98rSev/view?usp=drive_link",
+                "https://drive.google.com/file/d/1UGd-MML8-JzLyr0ep6D7WyvT3lsVjoSz/view?usp=drive_link",
+                "https://drive.google.com/file/d/1Qw8dQESc4v8sXlbR8lo-Pg2-HHpwoJ2V/view?usp=drive_link"
+            ],
+            // Tag 13 Bilder
+            [
+                "https://drive.google.com/file/d/1Aczw0Ozy2Lz9PZo2vKDwhpzZuzndf6EK/view?usp=drive_link",
+                "https://drive.google.com/file/d/1r5nkgixtVktbbVv1d4L4eSTz1B2GF-Qk/view?usp=drive_link",
+                "https://drive.google.com/file/d/1oyQ2Jgld8DQjtW7d_vvgD7JMN6wUQGeZ/view?usp=drive_link",
+                "https://drive.google.com/file/d/1zo9ctbHzif2vgXkl5dVxxtGjsJcI2hf2/view?usp=drive_link"
+            ],
+            // Tag 14 Bilder
+            [
+                "https://drive.google.com/file/d/1xjGbE6h3oBjeDWL3_4hRk0VJmcHYZnA9/view?usp=drive_link",
+                "https://drive.google.com/file/d/1pT1bF1N0_bFv9W9_h6okQpQcx4Ndtnxw/view?usp=drive_link",
+                "https://drive.google.com/file/d/1FEt6p58vg13RxmUqrgKKz_Ul5VrfoAh3/view?usp=drive_link",
+                "https://drive.google.com/file/d/1T_EoaJzqH2vPhq_vKTr-K2MjAVKnkzA1/view?usp=drive_link"
+            ]
+        ];
 
-<p>My first paragraph.</p>
+        const solutionWords = [
+            "lösungswort1", "lösungswort2", "lösungswort3", "lösungswort4", 
+            "lösungswort5", "lösungswort6", "lösungswort7", "lösungswort8", 
+            "lösungswort9", "lösungswort10", "lösungswort11", "lösungswort12", 
+            "lösungswort13", "lösungswort14"
+        ];
 
+        let currentDay = 0;
+        let lastAnswerTime = 0;
+
+        function loadImages(day) {
+            const imageContainer = document.getElementById('imageContainer');
+            imageContainer.innerHTML = '';
+            const images = imageSets[day];
+            images.forEach(image => {
+                const imgElement = document.createElement('img');
+                imgElement.src = image.replace('/view?', '/uc?');
+                imageContainer.appendChild(imgElement);
+            });
+        }
+
+        function checkAnswer() {
+            const answer = document.getElementById('answer').value.toLowerCase();
+            const correctAnswer = solutionWords[currentDay]; // Lösungswort des aktuellen Tages
+
+            const message = document.getElementById('message');
+            const reactions = [
+                "🤪 Fast! Aber nicht ganz richtig, noch nicht den Jackpot geknackt! Versuchs nochmal! 💡",
+                "🙃 Bist du sicher? Das ist leider nicht die Antwort, die wir gesucht haben! 😬",
+                "🚨 Autsch, das war es nicht! Komm schon, du kannst das! 🔥",
+                "😅 Haha, das war ein guter Versuch! Aber der richtige Code ist noch nicht gefunden! 💪",
+                "💥 Boom! Diese Antwort zielt in die falsche Richtung, aber du bist auf dem richtigen Weg! 🌈",
+                "🥺 Oh nooo! Das war zu einfach, das weiß doch jeder! 😉 Versuch nochmal!",
+                "🥳 Hmmm... Fast wie eine 10, aber noch nicht ganz. Gib dir noch einen Schub! ✨",
+                "🤩 Du bist der König des Ratewahns, aber heute schlägt das Rätsel zurück! 🏰",
+                "🧐 Ähm... Hast du sicher deinen Kaffee heute Morgen getrunken? 😅 Das war es leider nicht!",
+                "🦄 Da war es fast – aber irgendwie ist da noch der Regenbogen verborgen! 🌦️",
+                "🔮 Rätseln ist wie Zaubern, aber heute hast du den Zauberstab nicht gefunden! ✨",
+                "⚡ Boom, leider nicht, aber deine Antwort hat mich fast vom Stuhl geworfen! 😂",
+                "🌟 Du bist ein Rätsel-Mastermind! ...Aber leider nicht heute! 😭",
+                "🎉 Du bist heiß, heiß, heiß, aber noch nicht der richtige Treffer! 🔥",
+                "💀 Tödlich nah dran... Aber leider doch falsch! Versuch weiter! 😈"
+            ];
+
+            const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
+
+            if (answer === correctAnswer) {
+                message.style.color = 'green';
+                message.textContent = "🎉 Richtig! Du hast das Rätsel gelöst! 💥 Code geknackt! 🚀";
+                currentDay++;
+                if (currentDay < imageSets.length) {
+                    loadImages(currentDay);
+                } else {
+                    message.textContent = "🥳 Glückwunsch! Du hast ALLE Rätsel gelöst!! 🎉🎉🎉";
+                }
+            } else {
+                message.style.color = 'red';
+                message.textContent = randomReaction; // Eine zufällige lustige Reaktion
+            }
+        }
+
+        loadImages(currentDay); // Initiale Bilder laden
+    </script>
 </body>
 </html>
-
