@@ -4,152 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tägliches Rätsel</title>
-    <style>
-        body {
-            font-family: "Comic Sans MS", cursive, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        .game-container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: inline-block;
-        }
-        .media-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            justify-content: center;
-            align-items: center;
-        }
-        .media-container img,
-        .media-container video {
-            width: 150px;
-            height: auto;
-            border-radius: 5px;
-        }
-        input {
-            padding: 10px;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-        button {
-            padding: 10px 15px;
-            font-size: 16px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-        #message {
-            margin-top: 15px;
-            font-weight: bold;
-        }
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.26.1/axios.min.js"></script>
 </head>
 <body>
-    <div class="game-container">
-        <h2>Tägliches Rätsel</h2>
-        <div class="media-container" id="mediaContainer">Lade Inhalte...</div>
-        <input type="text" id="answer" placeholder="Dein Lösungswort...">
-        <button onclick="checkAnswer()">Überprüfen</button>
-        <p id="message"></p>
-    </div>
+    <h2>Tägliches Rätsel</h2>
+    <div id="mediaContainer">Lade Bilder...</div>
+    <input type="text" id="answer" placeholder="Dein Lösungswort...">
+    <button onclick="checkAnswer()">Überprüfen</button>
+    <p id="message"></p>
 
     <script>
-        // 14 Tage x 4 Medien pro Tag
-        const mediaSets = [
-            // Tag 1
-            ["1ABCxyz1", "1DEFxyz2", "1GHIxyz3", "1JKLxyz4"],
-            // Tag 2
-            ["1MNOxyz5", "1PQRxyz6", "1STUxyz7", "1VWXxyz8"],
-            // Tag 3
-            ["1YZAxyz9", "1BCDxyz0", "1EFGxyzA", "1HIJxyzB"],
-            // Tag 4
-            ["1KLMxyzC", "1NOPxyzD", "1QRSxyzE", "1TUVxyzF"],
-            // Tag 5
-            ["1WXYxyzG", "1ZABxyzH", "1CDExyzI", "1FGHxyzJ"],
-            // Tag 6
-            ["1IJKxyzK", "1LMNxyzL", "1OPQxyzM", "1RSTxyzN"],
-            // Tag 7
-            ["1UVWxyzO", "1XYZxyzP", "1ABCxyzQ", "1DEFxyzR"],
-            // Tag 8
-            ["1GHIxyzS", "1JKLxyzT", "1MNOxyzU", "1PQRxyzV"],
-            // Tag 9
-            ["1STUxyzW", "1VWXxyzX", "1YZAxyzY", "1BCDxyzZ"],
-            // Tag 10
-            ["1EFGxyz1", "1HIJxyz2", "1KLMxyz3", "1NOPxyz4"],
-            // Tag 11
-            ["1QRSxyz5", "1TUVxyz6", "1WXYxyz7", "1ZABxyz8"],
-            // Tag 12
-            ["1CDExyz9", "1FGHxyz0", "1IJKxyzA", "1LMNxyzB"],
-            // Tag 13
-            ["1OPQxyzC", "1RSTxyzD", "1UVWxyzE", "1XYZxyzF"],
-            // Tag 14
-            ["1ABCxyzG", "1DEFxyzH", "1GHIxyzI", "1JKLxyzJ"]
-        ];
+        const cloudName = "4Bilder1Wort"; // Dein Cloudinary Name
+        const apiKey = "662884519138926"; // Dein Cloudinary API-Key
+        const startDate = new Date("2024-02-24"); // Startdatum (ändern, wenn nötig)
+        const today = new Date();
+        const dayNumber = Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 1; // Berechnet den aktuellen Tag ab Startdatum
+        
+        async function loadImages() {
+            const folderName = `Tage/Tag${dayNumber}-`; // Basis des Ordnernamens
+            const cloudinaryURL = `https://res.cloudinary.com/${cloudName}/image/list/${folderName}.json`;
 
-        // 14 Lösungen für 14 Tage
-        const solutions = [
-            "lösung1", "lösung2", "lösung3", "lösung4",
-            "lösung5", "lösung6", "lösung7", "lösung8",
-            "lösung9", "lösung10", "lösung11", "lösung12",
-            "lösung13", "lösung14"
-        ];
+            try {
+                const response = await axios.get(cloudinaryURL);
+                const images = response.data.resources;
+                const mediaContainer = document.getElementById('mediaContainer');
+                mediaContainer.innerHTML = ""; // Reset
 
-        let currentDay = 0;
+                // Hole das Lösungswort aus dem Ordnernamen (TagX-Spanien → Spanien)
+                const solutionWord = images[0].public_id.split("/")[1].split("-")[1];
 
-        function getGoogleDriveLink(id) {
-            return `https://drive.google.com/uc?export=view&id=${id}`;
-        }
+                // Zeige maximal 4 Bilder an
+                images.slice(0, 4).forEach(img => {
+                    const imgElement = document.createElement("img");
+                    imgElement.src = `https://res.cloudinary.com/${cloudName}/image/upload/${img.public_id}.jpg`;
+                    imgElement.style.width = "150px";
+                    mediaContainer.appendChild(imgElement);
+                });
 
-        function loadMedia(day) {
-            const mediaContainer = document.getElementById('mediaContainer');
-            mediaContainer.innerHTML = '';
-            const media = mediaSets[day];
-
-            media.forEach((id, index) => {
-                let element;
-                if (index === 3) {
-                    // Video für den letzten Eintrag
-                    element = document.createElement('iframe');
-                    element.src = `https://drive.google.com/file/d/${id}/preview`;
-                    element.width = "200";
-                    element.height = "150";
-                } else {
-                    // Bilder für die ersten drei Einträge
-                    element = document.createElement('img');
-                    element.src = getGoogleDriveLink(id);
-                }
-                mediaContainer.appendChild(element);
-            });
-        }
-
-        function checkAnswer() {
-            const answer = document.getElementById('answer').value.toLowerCase().trim();
-            const message = document.getElementById('message');
-
-            if (answer === solutions[currentDay]) {
-                message.style.color = 'green';
-                message.textContent = `🎉 Richtig! Das Lösungswort war "${solutions[currentDay]}" 🎉`;
-                currentDay++;
-                if (currentDay < mediaSets.length) {
-                    setTimeout(() => {
-                        loadMedia(currentDay);
-                        message.textContent = '';
-                        document.getElementById('answer').value = '';
-                    }, 1500);
-                } else {
-                    message.textContent = "🏆 Glückwunsch! Du hast ALLE Rätsel gelöst! 🏆";
-                }
-            } else {
-                message.style.color = 'red';
-                message.textContent = "❌ Falsch! Versuch es nochmal! ❌";
+                // Speichere das Lösungswort für die Überprüfung
+                window.solution = solutionWord.toLowerCase();
+            } catch (error) {
+                console.error("Fehler beim Laden der Bilder:", error);
+                document.getElementById("mediaContainer").innerText = "Bilder konnten nicht geladen werden.";
             }
         }
 
-        loadMedia(currentDay);
+        function checkAnswer() {
+            const answer = document.getElementById("answer").value.toLowerCase();
+            const message = document.getElementById("message");
+
+            if (answer === window.solution) {
+                message.textContent = "🎉 Richtig! Du hast das Rätsel gelöst!";
+                message.style.color = "green";
+            } else {
+                message.textContent = "❌ Leider falsch, versuch es nochmal!";
+                message.style.color = "red";
+            }
+        }
+
+        loadImages();
     </script>
 </body>
 </html>
