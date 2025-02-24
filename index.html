@@ -4,65 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tägliches Rätsel</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.26.1/axios.min.js"></script>
 </head>
 <body>
-    <h2>Tägliches Rätsel</h2>
+    <h1>Tägliches Rätsel</h1>
     <div id="mediaContainer">Lade Bilder...</div>
-    <input type="text" id="answer" placeholder="Dein Lösungswort...">
-    <button onclick="checkAnswer()">Überprüfen</button>
-    <p id="message"></p>
+    <input type="text" id="solutionInput" placeholder="Dein Lösungswort...">
+    <button onclick="checkSolution()">Überprüfen</button>
+    <p id="result"></p>
 
     <script>
-        const cloudName = "4Bilder1Wort"; // Dein Cloudinary Name
-        const apiKey = "662884519138926"; // Dein Cloudinary API-Key
-        const startDate = new Date("2024-02-24"); // Startdatum (ändern, wenn nötig)
-        const today = new Date();
-        const dayNumber = Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 1; // Berechnet den aktuellen Tag ab Startdatum
-        
-        async function loadImages() {
-            const folderName = `Tage/Tag${dayNumber}-`; // Basis des Ordnernamens
-            const cloudinaryURL = `https://res.cloudinary.com/${cloudName}/image/list/${folderName}.json`;
+        const cloudName = "4Bilder1Wort";
+        const apiKey = "662884519138926";
+        const folderPrefix = "Tage";
+
+        async function loadImagesForDay(dayNumber) {
+            const folderPath = `${folderPrefix}/Tag${dayNumber}-`;  // z. B. "Tage/Tag1-Spanien"
 
             try {
-                const response = await axios.get(cloudinaryURL);
-                const images = response.data.resources;
-                const mediaContainer = document.getElementById('mediaContainer');
-                mediaContainer.innerHTML = ""; // Reset
+                const response = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/${folderPath}.json`);
+                if (!response.ok) throw new Error("Bilder konnten nicht geladen werden.");
 
-                // Hole das Lösungswort aus dem Ordnernamen (TagX-Spanien → Spanien)
-                const solutionWord = images[0].public_id.split("/")[1].split("-")[1];
+                const data = await response.json();
+                const images = data.resources;
+                const mediaContainer = document.getElementById("mediaContainer");
+                mediaContainer.innerHTML = "";
 
-                // Zeige maximal 4 Bilder an
-                images.slice(0, 4).forEach(img => {
-                    const imgElement = document.createElement("img");
-                    imgElement.src = `https://res.cloudinary.com/${cloudName}/image/upload/${img.public_id}.jpg`;
-                    imgElement.style.width = "150px";
-                    mediaContainer.appendChild(imgElement);
+                if (images.length === 0) {
+                    mediaContainer.innerText = "Keine Bilder gefunden.";
+                    return;
+                }
+
+                images.forEach((image) => {
+                    const img = document.createElement("img");
+                    img.src = `https://res.cloudinary.com/${cloudName}/image/upload/${image.public_id}.jpg`;
+                    img.style.width = "150px";
+                    img.style.margin = "5px";
+                    mediaContainer.appendChild(img);
                 });
 
-                // Speichere das Lösungswort für die Überprüfung
-                window.solution = solutionWord.toLowerCase();
+                // Lösungswort aus Ordnernamen extrahieren
+                const solutionWord = folderPath.split("-")[1].replace("/", "");
+                document.getElementById("solutionInput").dataset.word = solutionWord.toLowerCase();
+
             } catch (error) {
-                console.error("Fehler beim Laden der Bilder:", error);
+                console.error(error);
                 document.getElementById("mediaContainer").innerText = "Bilder konnten nicht geladen werden.";
             }
         }
 
-        function checkAnswer() {
-            const answer = document.getElementById("answer").value.toLowerCase();
-            const message = document.getElementById("message");
+        function checkSolution() {
+            const userInput = document.getElementById("solutionInput").value.trim().toLowerCase();
+            const correctWord = document.getElementById("solutionInput").dataset.word;
 
-            if (answer === window.solution) {
-                message.textContent = "🎉 Richtig! Du hast das Rätsel gelöst!";
-                message.style.color = "green";
+            if (userInput === correctWord) {
+                document.getElementById("result").innerText = "✅ Richtig!";
             } else {
-                message.textContent = "❌ Leider falsch, versuch es nochmal!";
-                message.style.color = "red";
+                document.getElementById("result").innerText = "❌ Falsch, versuche es erneut!";
             }
         }
 
-        loadImages();
+        loadImagesForDay(1);  // Beginnt mit Tag 1
     </script>
 </body>
 </html>
